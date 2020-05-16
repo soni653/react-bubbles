@@ -1,16 +1,19 @@
 import React, { useState } from "react";
 import axios from "axios";
+import axiosWithAuth from "../utils/axiosWithAuth";
 
 const initialColor = {
   color: "",
   code: { hex: "" }
 };
 
-const ColorList = ({ colors, updateColors }) => {
-  console.log(colors);
+ const ColorList = ({ colors, updateColors, getColorList }) => {
+//   console.log(colors);
+
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
 
+  console.log(colorToEdit);
   const editColor = color => {
     setEditing(true);
     setColorToEdit(color);
@@ -21,13 +24,25 @@ const ColorList = ({ colors, updateColors }) => {
     // Make a put request to save your updated color
     // think about where will you get the id from...
     // where is is saved right now?
+    axiosWithAuth()
+    .put(`/api/colors/${colorToEdit.id}`, colorToEdit)
+    .then(res => {
+      getColorList()
+      })
+      .catch(err => console.log(err))
   };
 
-  const deleteColor = color => {
+    const deleteColor = color => {
     // make a delete request to delete this color
+    axiosWithAuth()
+    .delete(`/api/colors/${color.id}`)
+    .then(res => {
+      getColorList()
+    })
+    .catch(err => console.log(err))
   };
 
-  return (
+ return (
     <div className="colors-wrap">
       <p>colors</p>
       <ul>
@@ -38,9 +53,10 @@ const ColorList = ({ colors, updateColors }) => {
                     e.stopPropagation();
                     deleteColor(color)
                   }
-                }>
+                }> 
+                
                   x
-              </span>{" "}
+                 </span>{" "}
               {color.color}
             </span>
             <div
@@ -76,14 +92,19 @@ const ColorList = ({ colors, updateColors }) => {
           </label>
           <div className="button-row">
             <button type="submit">save</button>
-            <button onClick={() => setEditing(false)}>cancel</button>
+            <button onClick={() => {
+              setEditing(false)
+              setColorToEdit(initialColor)
+            }}>cancel</button>
           </div>
         </form>
       )}
+      
       <div className="spacer" />
       {/* stretch - build another form here to add a color */}
     </div>
   );
 };
+ 
 
 export default ColorList;
